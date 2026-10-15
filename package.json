@@ -1,0 +1,16 @@
+{
+  "name": "node200-ejs-portfolio",
+  "version": "1.0.0",
+  "description": "Personal developer portfolio built with Express and EJS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "googleapis": "^186.0.0",
+    "morgan": "^1.10.0"
+  }
+}
