@@ -16,6 +16,7 @@ app.set('views', path.join(__dirname, 'views'));
 const SPREADSHEET_ID =
   '1pCsJVyYTPsDixlsLaM6hqP8y_E98acRDKTd2afr8nXY';
 
+// Find Google credentials locally or on Render
 const renderCredentials = '/etc/secrets/credentials.json';
 const localCredentials = path.join(__dirname, 'credentials.json');
 
@@ -32,7 +33,7 @@ if (fs.existsSync(credentialsPath)) {
     );
 
     const auth = new google.auth.GoogleAuth({
-      credentials,
+      credentials: credentials,
       scopes: [
         'https://www.googleapis.com/auth/spreadsheets',
       ],
@@ -40,12 +41,15 @@ if (fs.existsSync(credentialsPath)) {
 
     sheets = google.sheets({
       version: 'v4',
-      auth,
+      auth: auth,
     });
 
     console.log('Google Sheets configured successfully.');
   } catch (error) {
-    console.error('Google Sheets configuration error:', error.message);
+    console.error(
+      'Google Sheets configuration error:',
+      error.message
+    );
   }
 } else {
   console.warn('Google credentials not found.');
@@ -57,7 +61,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Homepage
+// Home page
 app.get('/', (req, res) => {
   res.render('index');
 });
@@ -67,9 +71,12 @@ app.get('/contact', (req, res) => {
   res.render('contact');
 });
 
-// Contact form
+// Contact form submission
 app.post('/thanks', async (req, res) => {
-  const { firstName, lastName, email, message } = req.body;
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const email = req.body.email;
+  const message = req.body.message;
 
   if (!firstName || !lastName || !email) {
     return res.status(400).send(
@@ -91,7 +98,7 @@ app.post('/thanks', async (req, res) => {
       requestBody: {
         values: [[
           new Date().toISOString(),
-          `${firstName} ${lastName}`,
+          firstName + ' ' + lastName,
           email,
           message || '',
         ]],
@@ -101,12 +108,15 @@ app.post('/thanks', async (req, res) => {
     console.log('Contact submission saved.');
 
     return res.render('thanks', {
-      firstName,
-      lastName,
-      name: `${firstName} ${lastName}`,
+      firstName: firstName,
+      lastName: lastName,
+      name: firstName + ' ' + lastName,
     });
   } catch (error) {
-    console.error('Google Sheets error:', error.message);
+    console.error(
+      'Google Sheets error:',
+      error.message
+    );
 
     return res.status(500).send(
       'Your message could not be saved. Please try again later.'
@@ -121,6 +131,6 @@ app.use((req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Portfolio running on port ${PORT}`);
+  console.log('Portfolio running on port ' + PORT);
 });
 ```
